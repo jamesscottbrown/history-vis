@@ -1,15 +1,25 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    }
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "description": "View browser history visually.",
+  "homepage_url": "http://jamesscottbrown.com",
+  "page_action": {
+    "default_title": "History Tree",
+    "default_popup": "historyPopup.html",
+    "default_icon": "icons/history.svg"
+  },
+  "icons": {
+    "48": "icons/history.svg",
+    "96": "icons/history.svg"
+  },
+  "permissions": [
+    "activeTab",
+    "history",
+    "tabs"
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "manifest_version": 2,
+  "name": "History Tree",
+  "version": "1.0"
 }
+
