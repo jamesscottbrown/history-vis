@@ -31,7 +31,7 @@ const Favicon = url => {
 
 const historyRow = props =>
     <ul>
-        <li>{Favicon(props.url)}<a href={props.url} className='historyLink'>{props.title}</a></li>
+        <li>{Favicon(props.url)}<a href={props.url} className='historyLink'>{props.title || props.url}</a></li>
         {props.children ? props.children.map(child => historyRow(child)) : ''}
     </ul>;
 
