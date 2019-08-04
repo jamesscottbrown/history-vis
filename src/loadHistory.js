@@ -75,49 +75,35 @@ function constructTree(allVisits, links) {
 
 
 function constructTree2(allVisits, links) {
-    var stack = ['-1'];
-    var output = [];
-
+    var rootNodes = [];
     let chronologicalLinks = links;
 
-    let depths = {'-1': 0};
-    var childIds = [];
+    chronologicalLinks.filter(l => {
+        var keepEdge;
 
-    const getVisitNode = id => allVisits.filter(d => d.id === id)[0];
+        let sourceNode = allVisits[+l.source];
+        let targetNode = allVisits[+l.target];
 
-    while (stack.length !== 0) {
-        for (let i = 0; i < stack.length; i++) {
-            let id = stack.pop();
+        if (!targetNode){
+            console.log("Unexpected - no target: ", l, targetNode);
+            return false;
+        }
 
-            childIds = chronologicalLinks.filter(l => l.source === id).map(l => l.target);
-            const children = childIds.map(getVisitNode);
-
-            if (id === '-1') {
-                const node = {url: ''};
-                if (!node.children) {
-                    node.children = [];
-                }
-                node.children = node.children.concat(children);
-                output.push(node);
-
-            } else {
-                const node = getVisitNode(id);
-                if (!node.children) {
-                    node.children = [];
-                }
-                node.children = node.children.concat(children);
+        if (l.source === '-1' || !sourceNode) {
+                rootNodes.push(l.target);
+                return false;
             }
 
-            childIds.map(c => {
-                depths[id] = depths[id] ? depths[id] : 0;
-                depths[c] = depths[id] + 1;
-            });
+            if (!sourceNode.children) {
+                sourceNode.children = [];
+            }
+            sourceNode.children = sourceNode.children.concat(targetNode);
+            keepEdge = true;
 
-            stack = stack.concat(childIds);
-        }
-    }
+        return keepEdge;
+    });
 
-    return output;
+    return rootNodes.map(id => allVisits[+id])
 }
 
 module.exports = {loadHistory, constructTree, constructTree2};
