@@ -2,7 +2,8 @@
 import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
-import {loadHistory, constructTree, constructTree2} from './loadHistory.js'
+import {loadHistory, constructTree, constructTree2, convertNetwork} from './loadHistory.js'
+import {drawGraph} from './network'
 
 function App() {
 
@@ -45,7 +46,8 @@ class HistoryTable extends Component {
     componentDidMount() {
         loadHistory().then(d => {
             this.setState({historyTree: constructTree2(d.allVisits, d.links)});
-            //this.render();
+
+            drawHistory(d.allVisits, d.links);
         });
     }
 
@@ -56,5 +58,10 @@ class HistoryTable extends Component {
     }
 }
 
+
+function drawHistory (allVisits, links) {
+    const graph = convertNetwork(allVisits, links);
+    drawGraph(graph, "#network");
+}
 
 export default App;

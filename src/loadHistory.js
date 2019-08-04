@@ -115,4 +115,27 @@ function constructTree2(allVisits, links) {
     return rootNodes.map(id => allVisits[+id])
 }
 
-module.exports = {loadHistory, constructTree, constructTree2};
+
+function convertNetwork(allVisits, links){
+    links = links.filter(l => l.source !== '-1');  // remove edges from -1
+    const actualVisits = allVisits.filter(d => d) // remove nulls
+        .filter( n =>{
+            const inDegree = links.filter(l => l.target === n.id).length;
+
+            if (inDegree > 0){
+                return true;
+            }
+            const outDegree = links.filter(l => l.source === n.id).length;
+            return outDegree > 0;
+        }); // remove isolated nodes
+
+    const visitIds = actualVisits.map(v => v.id);
+    const indexBasedLinks = links.map(l => ({source: visitIds.indexOf(l.source), target: visitIds.indexOf(l.target)}))
+        .filter(l => (l.source !== -1 && l.target !== -1));
+
+    const constraints = indexBasedLinks.map(l => ({axis: 'y', left: l.source, right: l.target, gap: 25}));
+
+    return {nodes: actualVisits, links: indexBasedLinks, constraints: constraints};
+}
+
+module.exports = {loadHistory, constructTree, constructTree2, convertNetwork};
