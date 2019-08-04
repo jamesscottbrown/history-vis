@@ -12,11 +12,6 @@ function App() {
         <h1>History Tree</h1>
       </header>
 
-
-        <p>
-          A diagram will appear here.
-        </p>
-
           <HistoryTable></HistoryTable>
 
     </div>
@@ -25,9 +20,18 @@ function App() {
 
 }
 
+const Favicon = url => {
+    try {
+        return <img src={`http://${new URL(url).hostname}/favicon.ico`} alt=' ' width='16pt' height='16pt' />;
+    } catch {
+        return '';
+    }
+};
+
+
 const historyRow = props =>
     <ul>
-        <li>{props.url}</li>
+        <li>{Favicon(props.url)}<a href={props.url} className='historyLink'>{props.title}</a></li>
         {props.children ? props.children.map(child => historyRow(child)) : ''}
     </ul>;
 
@@ -47,13 +51,7 @@ class HistoryTable extends Component {
 
     render(){
         return <div id='historyTable'>
-            <h3>History</h3>
-            <ul>
-                {console.log(`Rendering State: ${JSON.stringify(this.state)}`)}
-
-                {this.state.historyTree.map( historyItem => historyRow(historyItem))}
-
-            </ul>
+            {this.state.historyTree.map( historyItem => historyRow(historyItem))}
         </div>
     }
 }

@@ -2,9 +2,12 @@
   text-align: left;
 }
 
-.h1{
+h1{
   color: #282c34;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   font-size: calc(10px + 2vmin);
+}
+
+.historyLink {
+  margin-left: 5px;
 }
