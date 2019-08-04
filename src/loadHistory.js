@@ -32,10 +32,19 @@ function loadHistory() {
                 return processVisitItems(historyItems[i], visitItem);
             }))
             .then(d => {
-                const reducer = (accumulator, currentValue) => ({
-                    allVisits: accumulator.allVisits.concat(currentValue.allVisits),
-                    links: accumulator.links.concat(currentValue.links)
-                });
+                const reducer = (accumulator, currentValue) => {
+
+                    currentValue.allVisits.map((v, i) => {
+                        if (v) {
+                            accumulator.allVisits[i] = v;
+                        }
+                    });
+
+                    return {
+                        allVisits: accumulator.allVisits,
+                        links: accumulator.links.concat(currentValue.links)
+                    }
+                };
                 return d.reduce(reducer);
             })
     })
