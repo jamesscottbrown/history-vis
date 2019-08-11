@@ -1,5 +1,9 @@
 /*global browser*/
 import React, {Component} from 'react';
+
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 import logo from './logo.svg';
 import './App.css';
 import {loadHistory, constructTree, constructTree2, convertNetwork} from './loadHistory.js'
@@ -25,7 +29,31 @@ const Filter = props =>
         <input id='filterBox' onChange={props.onchange} defaultValue={props.filter}></input>
     </div>;
 
-const Favicon = url => {
+const DateRange = props => <div>
+    <DatePicker
+    selected={props.startDate}
+    onChange={ props.changeStartDate }
+    showTimeSelect
+    timeFormat="HH:mm"
+    timeIntervals={15}
+    dateFormat="MMMM d, yyyy h:mm aa"
+    timeCaption="time"
+/>
+
+    <DatePicker
+        selected={props.endDate}
+        onChange={ props.changeEndDate }
+        showTimeSelect
+        timeFormat="HH:mm"
+        timeIntervals={15}
+        dateFormat="MMMM d, yyyy h:mm aa"
+        timeCaption="time"
+    />
+
+    <button onChange={props.updateHistorySearch}>Update</button>
+</div>;
+
+    const Favicon = url => {
     try {
         return <img src={`http://${new URL(url).hostname}/favicon.ico`} alt=' ' width='16pt' height='16pt' />;
     } catch {
@@ -48,14 +76,18 @@ const historyRow = (props, filter) => {
 class HistoryTable extends Component {
     constructor(props) {
         super(props);
-        this.state = {historyTree: [], filter: ''};
+        this.state = {historyTree: [], filter: '', startDate: new Date(Date.now() - 1000*60*60*2), endDate: new Date()};
+
         this.updateFilter = this.updateFilter.bind(this);
+        this.changeStartDate = this.changeStartDate.bind(this);
+        this.changeEndDate = this.changeEndDate.bind(this);
+        this.updateHistorySearch = this.updateHistorySearch.bind(this);
+
     }
 
     componentDidMount() {
-        loadHistory().then(d => {
+        loadHistory(this.state.startDate, this.state.endDate).then(d => {
             this.setState({historyTree: constructTree2(d.allVisits, d.links)});
-
             drawHistory(d.allVisits, d.links);
         });
     }
@@ -64,9 +96,30 @@ class HistoryTable extends Component {
         this.setState({filter: event.target.value});
     }
 
+    changeStartDate(date){
+        this.setState({startDate: date});
+        this.updateHistorySearch();
+    }
+
+    changeEndDate(date){
+        this.setState({endDate: date});
+        this.updateHistorySearch();
+    }
+
+    updateHistorySearch(){
+        console.log('About to update history!');
+        loadHistory(this.state.startDate, this.state.endDate).then(d => {
+            this.setState({historyTree: constructTree2(d.allVisits, d.links)});
+            console.log('Updated history');
+            drawHistory(d.allVisits, d.links);
+        });
+
+    }
+
     render() {
         return <div>
-            <Filter filter={this.state.filter} onchange={this.updateFilter}></Filter>
+            <DateRange startDate={this.state.startDate} endDate={this.state.endDate} changeStartDate={this.changeStartDate} changeEndDate={this.changeEndDate} updateHistorySearch={this.updateHistorySearch}/>
+            <Filter filter={this.state.filter} onchange={this.updateFilter} />
             <div id='historyTable'>
                 {this.state.historyTree.map(historyItem => historyRow(historyItem, this.state.filter))}
             </div>

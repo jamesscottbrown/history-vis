@@ -1,8 +1,13 @@
 /*global browser*/
 
 
-function loadHistory() {
-    var searchingHistory = browser.history.search({text: 'http', maxResults: 500});
+function loadHistory(startTime, endTime) {
+
+    if (!startTime){ startTime = new Date(Date.now() - 1000*60*60*24); }
+    if (!endTime){ endTime = new Date(); }
+
+    const query = {text: 'http', maxResults: 1000, startTime, endTime};
+    var searchingHistory = browser.history.search(query);
 
     return searchingHistory.then((historyItems) => {
         const processVisitItems = (historyItem, visitItems) => {
@@ -11,6 +16,9 @@ function loadHistory() {
 
             for (let i in visitItems) {
                 const visitItem = visitItems[i];
+
+               if (visitItem.visitTime < startTime.getTime() || visitItem.visitTime > endTime.getTime){ continue; }
+
                 allVisits[visitItem.visitId] = {
                     id: visitItem.visitId,
                     historyItemId: visitItem.id,
@@ -45,11 +53,10 @@ function loadHistory() {
                         links: accumulator.links.concat(currentValue.links)
                     }
                 };
-                return d.reduce(reducer);
+                return d.reduce(reducer, {allVisits: [], links: []});
             })
     })
 }
-
 
 function constructTree(allVisits, links) {
     var stack = ['-1'];

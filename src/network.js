@@ -2,6 +2,8 @@ import * as cola from "webcola";
 import * as d3 from "d3";
 
 function drawGraph(graph, panel) {
+    d3.select('network').innerHTML = "";
+
     const NODE_RADIUS = 7;
     const REPEL_FORCE = -5;
     const LINK_DISTANCE = 100;
