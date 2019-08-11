@@ -12,14 +12,18 @@ function App() {
       <header className="App-header">
         <h1>History Tree</h1>
       </header>
-
           <HistoryTable></HistoryTable>
-
     </div>
   );
 //});
 
 }
+
+const Filter = props =>
+    <div>
+        <label for='filterBox'>Filter URLs</label>
+        <input id='filterBox' onChange={props.onchange} defaultValue={props.filter}></input>
+    </div>;
 
 const Favicon = url => {
     try {
@@ -30,17 +34,22 @@ const Favicon = url => {
 };
 
 
-const historyRow = props =>
-    <ul>
-        <li>{Favicon(props.url)}<a href={props.url} className='historyLink'>{props.title || props.url}</a></li>
-        {props.children ? props.children.map(child => historyRow(child)) : ''}
+const historyRow = (props, filter) => {
+    const matchingRow = filter && (props.title.toLowerCase().includes(filter.toLowerCase()) || props.url.toLowerCase().includes(filter.toLowerCase()));
+    const rowClass = matchingRow ? 'matching-row' : 'nonmatching-row';
+
+    return <ul>
+        <li className={rowClass}>{Favicon(props.url)}<a href={props.url} className='historyLink'>{props.title || props.url}</a></li>
+        {props.children ? props.children.map(child => historyRow(child, filter)) : ''}
     </ul>;
+};
 
 
 class HistoryTable extends Component {
     constructor(props) {
         super(props);
-        this.state = {historyTree: []};
+        this.state = {historyTree: [], filter: ''};
+        this.updateFilter = this.updateFilter.bind(this);
     }
 
     componentDidMount() {
@@ -51,9 +60,16 @@ class HistoryTable extends Component {
         });
     }
 
-    render(){
-        return <div id='historyTable'>
-            {this.state.historyTree.map( historyItem => historyRow(historyItem))}
+    updateFilter(event){
+        this.setState({filter: event.target.value});
+    }
+
+    render() {
+        return <div>
+            <Filter filter={this.state.filter} onchange={this.updateFilter}></Filter>
+            <div id='historyTable'>
+                {this.state.historyTree.map(historyItem => historyRow(historyItem, this.state.filter))}
+            </div>
         </div>
     }
 }
