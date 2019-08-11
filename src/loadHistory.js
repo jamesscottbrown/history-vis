@@ -91,6 +91,9 @@ function constructTree(allVisits, links) {
 
 
 function constructTree2(allVisits, links) {
+    allVisits = JSON.parse(JSON.stringify(allVisits));
+    links = JSON.parse(JSON.stringify(links));
+
     var rootNodes = [];
     let chronologicalLinks = links;
 
@@ -144,5 +147,56 @@ function convertNetwork(allVisits, links){
 
     return {nodes: actualVisits, links: indexBasedLinks, constraints: constraints};
 }
+function filterNetwork(allVisits, links, filter){
 
-module.exports = {loadHistory, constructTree, constructTree2, convertNetwork};
+    if (!filter){
+        return {visitsToShow: allVisits, linksToShow: links};
+    }
+
+
+    const visitMatches = v => v && (v.title.toLowerCase().includes(filter.toLowerCase()) || v.url.toLowerCase().includes(filter.toLowerCase()));
+
+    let visitsToProcess = allVisits.filter(visitMatches);
+
+    let linksToKeep = [], processedVisitIds = [], processedLinkIndexes = [];
+
+    // could iterate over links instead of visits
+    while (visitsToProcess.length > 0){
+        const visit = visitsToProcess.pop();
+
+        if (processedVisitIds.includes(visit.id)){ continue; }
+        processedVisitIds.push(visit.id);
+
+        // process incoming nodes
+        for (let i in links) {
+            if (processedLinkIndexes.includes(i)){
+                continue;
+            }
+
+            let l = links[i];
+            if (l.target === visit.id){
+                linksToKeep.push(l);
+
+                if (l.source === "-1"){ continue; } // don't track back down from root node
+                visitsToProcess.push(allVisits[+l.source]);
+                processedLinkIndexes.push(i);
+            }
+
+            if (l.source === visit.id){
+                linksToKeep.push(l);
+                visitsToProcess.push(allVisits[+l.target]);
+                processedLinkIndexes.push(i);
+            }
+        }
+
+        visitsToProcess = visitsToProcess.filter(v =>  v && !processedVisitIds.includes(v.id)); // unenessary ?
+    }
+
+    // preserve indexes
+    const visitsToShow = allVisits.map(v => (processedVisitIds.includes(v.id)) ? v : undefined);
+
+    return {visitsToShow, linksToShow: linksToKeep};
+}
+
+
+module.exports = {loadHistory, constructTree, constructTree2, convertNetwork, filterNetwork};

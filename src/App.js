@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import logo from './logo.svg';
 import './App.css';
-import {loadHistory, constructTree, constructTree2, convertNetwork} from './loadHistory.js'
+import {loadHistory, constructTree, constructTree2, convertNetwork, filterNetwork} from './loadHistory.js'
 import {drawGraph} from './network'
 
 function App() {
@@ -87,13 +87,17 @@ class HistoryTable extends Component {
 
     componentDidMount() {
         loadHistory(this.state.startDate, this.state.endDate).then(d => {
-            this.setState({historyTree: constructTree2(d.allVisits, d.links)});
+            this.setState({allVisits: d.allVisits, links: d.links, historyTree: constructTree2(d.allVisits, d.links)});
             drawHistory(d.allVisits, d.links);
         });
     }
 
     updateFilter(event){
         this.setState({filter: event.target.value});
+        const filtered  = filterNetwork(this.state.allVisits, this.state.links, event.target.value);
+        this.setState({visitsToShow: filtered.visitsToShow, linksToShow: filtered.linksToShow, historyTree: constructTree2(filtered.visitsToShow, filtered.linksToShow)});
+
+        drawHistory(filtered.visitsToShow, filtered.linksToShow);
     }
 
     changeStartDate(date){
@@ -109,7 +113,7 @@ class HistoryTable extends Component {
     updateHistorySearch(){
         console.log('About to update history!');
         loadHistory(this.state.startDate, this.state.endDate).then(d => {
-            this.setState({historyTree: constructTree2(d.allVisits, d.links)});
+            this.setState({allVisits: d.allVisits, links: d.links, historyTree: constructTree2(d.allVisits, d.links)});
             console.log('Updated history');
             drawHistory(d.allVisits, d.links);
         });
